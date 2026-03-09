@@ -15,7 +15,7 @@
       <form>
         <div>
           <label>Předmět</label></br>
-          <select>
+          <select id="predmet">
             <option="" disabeled selected>Vyber predmet...</option>
             <option value="MAT">Matematika</option>
             <option value="AJ">Angličtina</option>
@@ -25,12 +25,12 @@
         </div>
         <div>
           <label>Popis úkolu</label></br>
-          <input type="text" required maxlength="140"
+          <input id="popis" type="text" required maxlength="140"
             placeholder="Napiš popis úkolu">
         </div>
         <div>
             <label>Termin</label></br>
-            <input type='date' required>
+            <input id="termin" type='date' required>
         </div>
         <div>
             <button>Pridat</button>
