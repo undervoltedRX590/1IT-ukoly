@@ -2,145 +2,168 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>Školní sešit - Nástěnka</title>
+    <title>Školní nástěnka úkolů</title>
     <style>
         body { 
-            background-color: #fdfdfd; 
-            display: flex; 
-            justify-content: center; 
+            background-color: #f0f0f0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+ 
+        /* Sešitové pozadí */
+        .notebook {
+            width: 800px;
+            min-height: 500px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 5px;
             padding: 40px;
-            margin: 0;
-        }
- 
-        /* Styl linkovaného papíru */
-        .notebook-page { 
-            width: 600px; 
-            min-height: 800px;
-            background: #fff;
-            background-image: linear-gradient(#e1e1e1 1px, transparent 1px);
-            background-size: 100% 30px; /* Výška linky */
-            padding: 60px 40px 40px 80px;
+            background-image: linear-gradient(#d1d1d1 1px, transparent 1px);
+            background-size: 100% 30px;
             position: relative;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
-            border: 1px solid #ddd;
+            box-shadow: 10px 10px 0px #bbb;
         }
  
-        /* Svislá červená čára (okraj) */
-        .notebook-page::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 60px;
-            height: 100%;
-            width: 2px;
-            background-color: rgba(255, 0, 0, 0.3);
-        }
+        header { text-align: center; margin-bottom: 30px; line-height: 1; }
+        h1 { font-size: 1.5rem; margin: 0; color: #444; text-transform: uppercase; letter-spacing: 1px; }
+        .red-title { color: #d94343; font-weight: bold; font-size: 2rem; display: block; }
  
-        h2 { 
-            font-family: 'Comic Sans MS', cursive, sans-serif; 
-            color: #2c3e50;
-            margin-top: 0;
-            line-height: 30px;
-        }
- 
-        /* Učitelské poznámky na okraji */
-        .teacher-notes {
-            position: absolute;
-            right: -150px;
-            top: 100px;
-            width: 130px;
-            color: #d9534f; /* Červená propiska */
-            font-family: 'Brush Script MT', cursive;
+        /* Tlačítko Přidat úkol */
+        .add-task-container { text-align: center; margin-bottom: 40px; }
+        .btn-add {
+            background: white;
+            border: 3px solid #333;
+            border-radius: 15px;
+            padding: 10px 30px;
             font-size: 1.2rem;
-            transform: rotate(5deg);
-            line-height: 1.2;
-        }
- 
-        .form-section { margin-bottom: 40px; }
-        
-        input { 
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #007bff;
-            padding: 5px;
-            margin: 5px 0;
-            width: 80%;
-            font-family: inherit;
-        }
- 
-        button {
-            margin-top: 10px;
-            padding: 8px 15px;
-            background: #007bff;
-            color: white;
-            border: none;
             cursor: pointer;
-            border-radius: 3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s;
+        }
+        .btn-add:hover { transform: scale(1.05); background: #f9f9f9; }
+        .plus-icon { font-size: 1.5rem; border: 2px solid #333; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
+ 
+        /* Hlavní mřížka */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 30px;
         }
  
-        ul { list-style: none; padding: 0; }
-        
-        /* Úkoly zarovnané na linky */
-        li { 
-            line-height: 30px; /* Musí sedět s background-size */
-            border-bottom: 1px dashed #eee;
+        .box {
+            border: 3px solid #333;
+            border-radius: 25px;
+            padding: 20px;
+            min-height: 200px;
+            background: white;
+            position: relative;
+        }
+ 
+        .box-title {
+            position: absolute;
+            top: -15px;
+            left: 30px;
+            background: white;
+            padding: 0 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+ 
+        /* Seznam úkolů */
+        .task-list { list-style: none; padding: 0; margin: 0; }
+        .task-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
         }
+        .task-icons { display: flex; gap: 5px; }
+        .icon { width: 20px; height: 20px; border: 1px solid #333; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .icon-check { background: #c8e6c9; }
+        .icon-cross { background: #ffcdd2; }
  
-        .done { text-decoration: line-through; color: #888; }
-        
-        .date-tag { font-size: 0.8em; color: #666; margin-left: 10px; }
+        /* Učitelské poznámky */
+        .teacher-text { font-style: italic; color: #555; font-size: 0.95rem; }
+        .sticky-note {
+            background: #ffeb3b;
+            width: 80px;
+            height: 40px;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            transform: rotate(-5deg);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            border-top: 2px solid #fdd835;
+        }
     </style>
 </head>
 <body>
  
-<div class="notebook-page">
-    <div class="teacher-notes">
-        Dbej na úpravu!<br>
-        Podepsat rodiči.<br>
-        <span style="font-size: 2em;">1!</span>
+<div class="notebook">
+    <header>
+        <h1>Vítejte na školní nástěnce</h1>
+        <span class="red-title">úkolů</span>
+    </header>
+ 
+    <div class="add-task-container">
+        <button class="btn-add" onclick="addNewTask()">
+            <span class="plus-icon">+</span> přidat úkol
+        </button>
     </div>
  
-    <section class="form-section">
-        <h2>✍️ Nový úkol</h2>
-        <input type="text" id="subject" placeholder="Předmět">
-        <input type="text" id="task" placeholder="Zadání...">
-        <input type="date" id="deadline">
-        <br>
-        <button onclick="addTodo()">Zapsat do sešitu</button>
-    </section>
- 
-    <section>
-        <h2>📚 Moje povinnosti</h2>
-        <ul id="todo-list">
+    <div class="content-grid">
+        <div class="box">
+            <span class="box-title">seznam</span>
+            <ul class="task-list" id="task-list">
+                <li class="task-item">
+                    <span>úkol Stylistika (ČJ)</span>
+                    <div class="task-icons">
+                        <span class="icon icon-check">✔</span>
+                    </div>
+                </li>
+                <li class="task-item">
+                    <span>úkol rovnice (M)</span>
+                    <div class="task-icons">
+                        <span class="icon icon-cross">✘</span>
+                    </div>
+                </li>
             </ul>
-    </section>
+        </div>
+ 
+        <div class="box">
+            <span class="box-title">učitelské poznámky</span>
+            <div class="teacher-text">
+                A. Fryblíková: „Odevzdat do pátku!“<br>
+                Zkontrolovat sešity z minulého týdne.
+            </div>
+            <div class="sticky-note"></div>
+        </div>
+    </div>
 </div>
  
 <script>
-    function addTodo() {
-        const sub = document.getElementById('subject').value;
-        const task = document.getElementById('task').value;
-        const date = document.getElementById('deadline').value;
- 
-        if(!sub || !task) return;
- 
-        const list = document.getElementById('todo-list');
-        const li = document.createElement('li');
-        
-        li.innerHTML = `
-            <span><strong>${sub}:</strong> ${task} <span class="date-tag">(${date})</span></span>
-            <input type="checkbox" onclick="this.parentElement.classList.toggle('done')">
-        `;
-        
-        list.appendChild(li);
-        
-        // Reset polí
-        document.getElementById('subject').value = '';
-        document.getElementById('task').value = '';
+    function addNewTask() {
+        const text = prompt("Zadej název úkolu:");
+        if (text) {
+            const list = document.getElementById('task-list');
+            const li = document.createElement('li');
+            li.className = 'task-item';
+            li.innerHTML = `
+                <span>${text}</span>
+                <div class="task-icons">
+                    <span class="icon" onclick="this.style.background='#c8e6c9'">✔</span>
+                    <span class="icon" onclick="this.parentElement.parentElement.remove()">✘</span>
+                </div>
+            `;
+            list.appendChild(li);
+        }
     }
 </script>
  
 </body>
 </html>
- 
