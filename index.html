@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>Školní nástěnka - Kompletní edice</title>
+    <title>Školní nástěnka - Finální verze</title>
     <style>
         body { 
             background-color: #f0f0f0; 
@@ -18,20 +18,33 @@
             box-shadow: 10px 10px 0px #bbb;
         }
  
-        header { text-align: center; margin-bottom: 30px; cursor: pointer; }
+        header { text-align: center; margin-bottom: 30px; cursor: pointer; user-select: none; }
         h1 { font-size: 1.5rem; margin: 0; color: #444; text-transform: uppercase; }
         .red-title { color: #d94343; font-weight: bold; font-size: 2rem; display: block; }
  
         #admin-status { color: #4CAF50; font-weight: bold; font-size: 0.8rem; display: none; margin-top: 5px; }
  
+        /* Tlačítka jsou nyní vidět, ale dají se ovládat jen v adminu */
         .controls { 
             display: flex; justify-content: center; gap: 15px; margin-bottom: 40px;
-            visibility: hidden;
+            opacity: 0.3; pointer-events: none; transition: 0.3s;
+        }
+ 
+        .controls.admin-active {
+            opacity: 1; pointer-events: auto;
         }
  
         .btn-main {
-            background: white; border: 3px solid #333; border-radius: 12px;
-            padding: 8px 15px; cursor: pointer; font-weight: bold;
+            background: white; border: 3px solid #333; border-radius: 20px;
+            padding: 10px 20px; cursor: pointer; font-weight: bold;
+            display: flex; align-items: center; gap: 10px; font-size: 1rem;
+        }
+ 
+        .btn-main:hover { background: #f9f9f9; transform: translateY(-2px); }
+ 
+        .circle-icon {
+            width: 24px; height: 24px; border: 2px solid #333; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: bold;
         }
  
         .content-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px; }
@@ -59,8 +72,9 @@
         .teacher-note-item { color: #d94343; font-style: italic; font-family: 'Comic Sans MS', cursive; }
         
         .btn-delete {
-            background: #ffcdd2; border: 1px solid #d32f2f; border-radius: 5px;
-            cursor: pointer; margin-left: 10px; display: none;
+            background: #ffcdd2; border: 2px solid #333; border-radius: 8px;
+            cursor: pointer; margin-left: 10px; padding: 5px; font-size: 1rem;
+            display: none; /* Zapne se v JS při adminu */
         }
  
         /* Modální okno */
@@ -70,13 +84,11 @@
         }
         .modal-content {
             background: white; border: 4px solid #333; border-radius: 20px;
-            padding: 25px; width: 350px; text-align: left;
+            padding: 25px; width: 350px;
         }
-        .modal-content label { font-weight: bold; font-size: 0.8rem; }
         .modal-content input, .modal-content textarea { 
             width: 100%; padding: 8px; margin: 5px 0 15px 0; 
             border: 2px solid #333; border-radius: 8px; box-sizing: border-box;
-            font-family: inherit;
         }
  
         .sticky-note {
@@ -91,17 +103,21 @@
     <header onclick="toggleAdmin()">
         <h1>Vítejte na školní nástěnce</h1>
         <span class="red-title">úkolů</span>
-        <div id="admin-status">ADMIN REŽIM (Kliknutím vypneš)</div>
+        <div id="admin-status">ADMIN REŽIM AKTIVNÍ</div>
     </header>
  
     <div class="controls" id="admin-controls">
-        <button class="btn-main" onclick="openModal('task')">➕ Přidat Úkol</button>
-        <button class="btn-main" onclick="openModal('note')" style="border-color: #d94343;">❗ Přidat Poznámku</button>
+        <button class="btn-main" onclick="openModal('task')">
+            <span class="circle-icon">+</span> přidat úkol
+        </button>
+        <button class="btn-main" onclick="openModal('note')" style="border-color: #d94343; color: #d94343;">
+            <span class="circle-icon" style="border-color: #d94343;">!</span> přidat poznámku
+        </button>
     </div>
  
     <div class="content-grid">
         <div class="box">
-            <span class="box-title">seznam úkolů</span>
+            <span class="box-title">seznam</span>
             <ul id="task-list" class="list-container"></ul>
         </div>
         <div class="box">
@@ -115,16 +131,11 @@
 <div id="modal-task" class="modal">
     <div class="modal-content">
         <h2>Nový úkol</h2>
-        <label>Název předmětu/úkolu:</label>
-        <input type="text" id="task-name" placeholder="např. Matematika - rovnice">
-        <label>Popis (co přesně udělat):</label>
-        <textarea id="task-desc" rows="3" placeholder="Strana 45, cvičení 2..."></textarea>
-        <label>Termín odevzdání:</label>
+        <input type="text" id="task-name" placeholder="Předmět / Název">
+        <textarea id="task-desc" placeholder="Popis úkolu..."></textarea>
         <input type="date" id="task-date">
-        <div style="display:flex; gap:10px;">
-            <button class="btn-main" onclick="saveTask()">Uložit</button>
-            <button class="btn-main" onclick="closeModals()">Zrušit</button>
-        </div>
+        <button class="btn-main" onclick="saveTask()">Uložit</button>
+        <button class="btn-main" onclick="closeModals()" style="border-color:#ccc; margin-top:5px;">Zrušit</button>
     </div>
 </div>
  
@@ -132,10 +143,8 @@
     <div class="modal-content">
         <h2>Nová poznámka</h2>
         <input type="text" id="note-text" placeholder="Text poznámky...">
-        <div style="display:flex; gap:10px;">
-            <button class="btn-main" onclick="saveNote()">Uložit</button>
-            <button class="btn-main" onclick="closeModals()">Zrušit</button>
-        </div>
+        <button class="btn-main" onclick="saveNote()">Uložit</button>
+        <button class="btn-main" onclick="closeModals()" style="border-color:#ccc; margin-top:5px;">Zrušit</button>
     </div>
 </div>
  
@@ -144,13 +153,23 @@
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     let notes = JSON.parse(localStorage.getItem('notes')) || [];
  
+    // Spustit vykreslení hned po načtení
     window.onload = renderAll;
  
     function toggleAdmin() {
         isAdmin = !isAdmin;
-        document.getElementById('admin-status').style.display = isAdmin ? 'block' : 'none';
-        document.getElementById('admin-controls').style.visibility = isAdmin ? 'visible' : 'hidden';
-        renderAll();
+        const status = document.getElementById('admin-status');
+        const controls = document.getElementById('admin-controls');
+        
+        status.style.display = isAdmin ? 'block' : 'none';
+        
+        if(isAdmin) {
+            controls.classList.add('admin-active');
+        } else {
+            controls.classList.remove('admin-active');
+        }
+        
+        renderAll(); // Překreslit, aby se ukázaly/skryly popelnice
     }
  
     function openModal(type) {
@@ -159,19 +178,13 @@
  
     function closeModals() {
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-        document.getElementById('task-name').value = '';
-        document.getElementById('task-desc').value = '';
-        document.getElementById('task-date').value = '';
-        document.getElementById('note-text').value = '';
     }
  
     function saveTask() {
         const name = document.getElementById('task-name').value;
         const desc = document.getElementById('task-desc').value;
         const date = document.getElementById('task-date').value;
-        
         if (!name) return;
- 
         tasks.push({ name, desc, date });
         localStorage.setItem('tasks', JSON.stringify(tasks));
         renderAll();
@@ -181,7 +194,6 @@
     function saveNote() {
         const text = document.getElementById('note-text').value;
         if (!text) return;
- 
         notes.push(text);
         localStorage.setItem('notes', JSON.stringify(notes));
         renderAll();
@@ -207,17 +219,17 @@
             <li class="item">
                 <div class="task-info">
                     <span class="task-name">${t.name}</span>
-                    <span class="task-desc">${t.desc || ''}</span>
-                    ${t.date ? `<span class="task-date">📅 Termín: ${t.date}</span>` : ''}
+                    <span class="task-desc">${t.desc}</span>
+                    ${t.date ? `<span class="task-date">📅 ${t.date}</span>` : ''}
                 </div>
-                <button class="btn-delete" style="display: ${isAdmin ? 'inline-block' : 'none'}" onclick="deleteItem('task', ${i})">🗑️</button>
+                <button class="btn-delete" style="display: ${isAdmin ? 'block' : 'none'}" onclick="deleteItem('task', ${i})">🗑️</button>
             </li>
         `).join('');
  
         nList.innerHTML = notes.map((n, i) => `
             <li class="item teacher-note-item">
                 <span>• ${n}</span>
-                <button class="btn-delete" style="display: ${isAdmin ? 'inline-block' : 'none'}" onclick="deleteItem('note', ${i})">🗑️</button>
+                <button class="btn-delete" style="display: ${isAdmin ? 'block' : 'none'}" onclick="deleteItem('note', ${i})">🗑️</button>
             </li>
         `).join('');
     }
