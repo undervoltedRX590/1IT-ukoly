@@ -10,12 +10,13 @@
             display: flex;
             justify-content: center;
             padding: 20px;
+            margin: 0;
         }
  
         /* Sešitové pozadí */
         .notebook {
             width: 800px;
-            min-height: 500px;
+            min-height: 550px;
             background: white;
             border: 3px solid #333;
             border-radius: 5px;
@@ -30,35 +31,35 @@
         h1 { font-size: 1.5rem; margin: 0; color: #444; text-transform: uppercase; letter-spacing: 1px; }
         .red-title { color: #d94343; font-weight: bold; font-size: 2rem; display: block; }
  
-        /* Tlačítko Přidat úkol */
-        .add-task-container { text-align: center; margin-bottom: 40px; }
-        .btn-add {
+        /* Tlačítka nahoře */
+        .controls { text-align: center; margin-bottom: 40px; display: flex; justify-content: center; gap: 15px; }
+        .btn-main {
             background: white;
             border: 3px solid #333;
             border-radius: 15px;
-            padding: 10px 30px;
-            font-size: 1.2rem;
+            padding: 10px 20px;
+            font-size: 1.1rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            transition: transform 0.2s;
+            font-weight: bold;
         }
-        .btn-add:hover { transform: scale(1.05); background: #f9f9f9; }
-        .plus-icon { font-size: 1.5rem; border: 2px solid #333; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
+        .btn-main:hover { background: #f0f0f0; transform: translateY(-2px); }
+        .plus-icon { font-size: 1.2rem; border: 2px solid #333; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
  
         /* Hlavní mřížka */
         .content-grid {
             display: grid;
-            grid-template-columns: 1fr 1.2fr;
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
         }
  
         .box {
             border: 3px solid #333;
             border-radius: 25px;
-            padding: 20px;
-            min-height: 200px;
+            padding: 25px 20px;
+            min-height: 250px;
             background: white;
             position: relative;
         }
@@ -73,31 +74,49 @@
             font-size: 1.1rem;
         }
  
-        /* Seznam úkolů */
-        .task-list { list-style: none; padding: 0; margin: 0; }
-        .task-item {
+        /* Seznamy */
+        .list-container { list-style: none; padding: 0; margin: 0; }
+        .item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
+            padding: 8px 0;
             border-bottom: 1px solid #eee;
+            line-height: 1.2;
         }
-        .task-icons { display: flex; gap: 5px; }
-        .icon { width: 20px; height: 20px; border: 1px solid #333; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .icon-check { background: #c8e6c9; }
-        .icon-cross { background: #ffcdd2; }
+        .teacher-note-item { color: #d94343; font-style: italic; font-family: 'Comic Sans MS', cursive; }
  
-        /* Učitelské poznámky */
-        .teacher-text { font-style: italic; color: #555; font-size: 0.95rem; }
+        /* Modální okno */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: white;
+            border: 4px solid #333;
+            border-radius: 20px;
+            padding: 30px;
+            width: 350px;
+            text-align: center;
+        }
+        .modal-content input, .modal-content textarea {
+            width: 90%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+        .modal-buttons { display: flex; justify-content: center; gap: 10px; }
+ 
         .sticky-note {
             background: #ffeb3b;
-            width: 80px;
-            height: 40px;
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
+            width: 60px; height: 30px;
+            position: absolute; bottom: 15px; right: 15px;
             transform: rotate(-5deg);
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
             border-top: 2px solid #fdd835;
         }
     </style>
@@ -110,58 +129,80 @@
         <span class="red-title">úkolů</span>
     </header>
  
-    <div class="add-task-container">
-        <button class="btn-add" onclick="addNewTask()">
+    <div class="controls">
+        <button class="btn-main" onclick="openModal('task')">
             <span class="plus-icon">+</span> přidat úkol
+        </button>
+        <button class="btn-main" onclick="openModal('note')" style="border-color: #d94343;">
+            <span class="plus-icon" style="border-color: #d94343; color: #d94343;">!</span> přidat poznámku
         </button>
     </div>
  
     <div class="content-grid">
         <div class="box">
             <span class="box-title">seznam</span>
-            <ul class="task-list" id="task-list">
-                <li class="task-item">
-                    <span>úkol Stylistika (ČJ)</span>
-                    <div class="task-icons">
-                        <span class="icon icon-check">✔</span>
-                    </div>
-                </li>
-                <li class="task-item">
-                    <span>úkol rovnice (M)</span>
-                    <div class="task-icons">
-                        <span class="icon icon-cross">✘</span>
-                    </div>
-                </li>
-            </ul>
+            <ul id="task-list" class="list-container"></ul>
         </div>
  
         <div class="box">
             <span class="box-title">učitelské poznámky</span>
-            <div class="teacher-text">
-                A. Fryblíková: „Odevzdat do pátku!“<br>
-                Zkontrolovat sešity z minulého týdne.
-            </div>
+            <ul id="note-list" class="list-container"></ul>
             <div class="sticky-note"></div>
         </div>
     </div>
 </div>
  
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h2 id="modal-title">Přidat položku</h2>
+        <input type="text" id="modal-input" placeholder="Napiš text sem...">
+        <div class="modal-buttons">
+            <button class="btn-main" onclick="saveItem()">Uložit</button>
+            <button class="btn-main" onclick="closeModal()" style="border-color: #999;">Zrušit</button>
+        </div>
+    </div>
+</div>
+ 
 <script>
-    function addNewTask() {
-        const text = prompt("Zadej název úkolu:");
-        if (text) {
+    let currentType = '';
+ 
+    function openModal(type) {
+        currentType = type;
+        document.getElementById('modal-title').innerText = type === 'task' ? 'Nový úkol' : 'Nová poznámka';
+        document.getElementById('modal-input').placeholder = type === 'task' ? 'např. Úkol z matematiky' : 'např. Přinést sešit!';
+        document.getElementById('modal').style.display = 'flex';
+        document.getElementById('modal-input').focus();
+    }
+ 
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+        document.getElementById('modal-input').value = '';
+    }
+ 
+    function saveItem() {
+        const value = document.getElementById('modal-input').value;
+        if (!value) return;
+ 
+        if (currentType === 'task') {
             const list = document.getElementById('task-list');
             const li = document.createElement('li');
-            li.className = 'task-item';
-            li.innerHTML = `
-                <span>${text}</span>
-                <div class="task-icons">
-                    <span class="icon" onclick="this.style.background='#c8e6c9'">✔</span>
-                    <span class="icon" onclick="this.parentElement.parentElement.remove()">✘</span>
-                </div>
-            `;
+            li.className = 'item';
+            li.innerHTML = `<span>${value}</span> <input type="checkbox" onclick="this.parentElement.style.textDecoration='line-through'">`;
+            list.appendChild(li);
+        } else {
+            const list = document.getElementById('note-list');
+            const li = document.createElement('li');
+            li.className = 'item teacher-note-item';
+            li.innerHTML = `<span>• ${value}</span>`;
             list.appendChild(li);
         }
+ 
+        closeModal();
+    }
+ 
+    // Zavření okna kliknutím mimo něj
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('modal')) closeModal();
     }
 </script>
  
